@@ -19,6 +19,8 @@ riails = Channel.fromPath("${params.in}")
 
 // do the scan2
 process scan2 {
+	cpus 4
+	memory '20 GB'
 	publishDir params.out, mode: 'copy'
 
 	input:
@@ -63,6 +65,7 @@ crossobj_split = seeds.combine(crossobj)
 // do the permutations
 process scan2000 {
 	cpus 4
+	memory '20 GB'
 	tag { s }
 
 	input:
