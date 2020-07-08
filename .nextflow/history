@@ -1,2 +1,0 @@
-2020-07-08 10:59:08	-	high_darwin	-	7de354c6047af63149f43cf302ca16e0	c1c97a2a-a74f-4de8-b10b-b4812736fec2	nextflow run main.nf --in test_trait.tsv --nperm 10 --cross N2xCB4856cross
-2020-07-08 10:59:38	-	awesome_noyce	-	7de354c6047af63149f43cf302ca16e0	5cc2dc65-4441-4e4d-ac0c-233dc5cc3770	nextflow run main.nf --in test_trait.tsv --nperm 10 --cross N2xCB4856cross
