@@ -27,7 +27,7 @@ process scan2 {
 		file("pheno") from riails
 
 	output:
-		file("scan2.Rda")
+		file("scan2.Rda") into scan2_object
 		file("mapcross.Rda") into crossobj
 
 	"""
@@ -55,6 +55,11 @@ process scan2 {
 
 	# make output into dataframe
 	save(scan2, file = "scan2.Rda")
+
+	# plot scan2
+	png("scan2plot.png")
+	plot(scan2)
+	dev.off()
 
 	"""
 }
@@ -107,11 +112,85 @@ process concatenate_quantiles {
 		val("scans") from scan2000.toSortedList()
 
     output:
-        file("scantwothousand.tsv")
+        file("scantwothousand.tsv") into perms
 
     """
     # use this to only print the header of the first line
 	awk 'FNR>1 || NR==1' ${scans.join(" ")} > scantwothousand.tsv
     """
+
+}
+
+// summarize scan2 and add thresholds for significance from permutations
+process summarize_scan2 {
+
+	publishDir params.out, mode: "copy"
+
+	input:
+	file("scantwothousand") from perms
+	file("scan2") from scan2_object
+
+	output:
+	file("scan2summary.tsv")
+
+
+	"""
+	#!/usr/bin/env Rscript --vanilla
+
+	library(dplyr)
+	library(readr)
+
+	#insert cross data
+	crossobj <- get(linkagemapping::load_cross_obj("${params.cross}"))
+
+	# load scan2
+	load("$scan2")
+
+	# load perms
+	perms <- readr::read_tsv("$scantwothousand")
+
+	# summarize scantwo and add GWER thresholds defined by permutations
+	scan2_summary <- summary(scan2) %>%
+	    dplyr::mutate(fv1_thresh = quantile(perms\$fv1, probs = 0.95),
+	                  full_thresh = quantile(perms\$full, probs = 0.95),
+	                  add_thresh = quantile(perms\$add, probs = 0.95),
+	                  av1_thresh = quantile(perms\$av1, probs = 0.95),
+	                  int_thresh = quantile(perms\$int, probs = 0.95)) %>%
+	    dplyr::select(trait, chr1:int_thresh) %>%
+	    dplyr::mutate(pos1f = as.character(pos1f),
+	                  pos2f = as.character(pos2f),
+	                  pos1a = as.character(pos1a),
+	                  pos2a = as.character(pos2a))
+
+	# riail marker conversion
+	mappos <- qtl::pull.map(crossobj, as.table = TRUE) %>%
+	    dplyr::mutate(marker = rownames(.),
+	                  cM = as.character(pos)) %>%
+	    dplyr::select(-pos, -chr) %>%
+	    dplyr::distinct(cM, .keep_all = T) 
+
+	# convert genetic pos to genomic pos
+	scan2_summary <- scan2_summary %>%
+	    # pos1f
+	    dplyr::left_join(mappos, by = c("pos1f" = "cM")) %>%
+	    dplyr::mutate(pos1f = as.numeric(stringr::str_split_fixed(marker, "_", 2)[,2])) %>%
+	    dplyr::select(-marker) %>%
+	    # pos2f
+	    dplyr::left_join(mappos, by = c("pos2f" = "cM")) %>%
+	    dplyr::mutate(pos2f = as.numeric(stringr::str_split_fixed(marker, "_", 2)[,2])) %>%
+	    dplyr::select(-marker) %>%
+	    # pos1a
+	    dplyr::left_join(mappos, by = c("pos1a" = "cM")) %>%
+	    dplyr::mutate(pos1a = as.numeric(stringr::str_split_fixed(marker, "_", 2)[,2])) %>%
+	    dplyr::select(-marker) %>%
+	    # pos2a
+	    dplyr::left_join(mappos, by = c("pos2a" = "cM")) %>%
+	    dplyr::mutate(pos2a = as.numeric(stringr::str_split_fixed(marker, "_", 2)[,2])) %>%
+	    dplyr::select(-marker)
+
+	readr::write_tsv(scan2_summary, "scan2summary.tsv")
+
+	"""
+
 
 }
