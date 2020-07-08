@@ -3,6 +3,8 @@
 // Script to run scan2 and scan2000 permutations for linkagemapping traits
 
 // params.in = riail phenotype for just 1 trait
+date = new Date().format( 'yyyyMMdd' )
+
 params.nperm = 1000
 params.set = 2
 params.cross = "N2xCB4856cross_full"
@@ -142,6 +144,7 @@ process summarize_scan2 {
 	library(dplyr)
 	library(readr)
 	library(linkagemapping)
+	library(qtl)
 
 	#insert cross data
 	crossobj <- get(linkagemapping::load_cross_obj("${params.cross}"))
