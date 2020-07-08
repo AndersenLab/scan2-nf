@@ -141,6 +141,7 @@ process summarize_scan2 {
 
 	library(dplyr)
 	library(readr)
+	library(linkagemapping)
 
 	#insert cross data
 	crossobj <- get(linkagemapping::load_cross_obj("${params.cross}"))
