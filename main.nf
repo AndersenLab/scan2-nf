@@ -7,7 +7,7 @@ params.nperm = 1000
 params.set = 2
 params.cross = "N2xCB4856cross_full"
 nperms = params.nperm
-params.out = '.'
+params.out = 'Analysis-${date}'
 
 // generate seeds random numbers
 seeds = Channel
