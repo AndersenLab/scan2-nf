@@ -29,6 +29,8 @@ process scan2 {
 	output:
 		file("scan2.Rda") into scan2_object
 		file("mapcross.Rda") into crossobj
+		file("scan2plot.png")
+
 
 	"""
 	#!/usr/bin/env Rscript --vanilla
