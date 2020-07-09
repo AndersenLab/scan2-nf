@@ -162,7 +162,6 @@ process summarize_scan2 {
 	                  add_thresh = quantile(perms\$add, probs = 0.95),
 	                  av1_thresh = quantile(perms\$av1, probs = 0.95),
 	                  int_thresh = quantile(perms\$int, probs = 0.95)) %>%
-	    dplyr::select(trait, chr1:int_thresh) %>%
 	    dplyr::mutate(pos1f = as.character(pos1f),
 	                  pos2f = as.character(pos2f),
 	                  pos1a = as.character(pos1a),
@@ -176,7 +175,7 @@ process summarize_scan2 {
 	    dplyr::distinct(cM, .keep_all = T) 
 
 	# convert genetic pos to genomic pos
-	scan2_summary <- scan2_summary %>%
+	test <- scan2_summary %>%
 	    # pos1f
 	    dplyr::left_join(mappos, by = c("pos1f" = "cM")) %>%
 	    dplyr::mutate(pos1f = as.numeric(stringr::str_split_fixed(marker, "_", 2)[,2])) %>%
@@ -194,7 +193,7 @@ process summarize_scan2 {
 	    dplyr::mutate(pos2a = as.numeric(stringr::str_split_fixed(marker, "_", 2)[,2])) %>%
 	    dplyr::select(-marker)
 
-	readr::write_tsv(scan2_summary, "scan2summary.tsv")
+	readr::write_tsv(test, "scan2summary.tsv")
 
 	"""
 
