@@ -167,31 +167,68 @@ process summarize_scan2 {
 	                  pos1a = as.character(pos1a),
 	                  pos2a = as.character(pos2a))
 
-	# riail marker conversion
-	mappos <- qtl::pull.map(crossobj, as.table = TRUE) %>%
-	    dplyr::mutate(marker = rownames(.),
-	                  cM = as.character(pos)) %>%
-	    dplyr::select(-pos, -chr) %>%
-	    dplyr::distinct(cM, .keep_all = T) 
-
-	# convert genetic pos to genomic pos
-	test <- scan2_summary %>%
-	    # pos1f
-	    dplyr::left_join(mappos, by = c("pos1f" = "cM")) %>%
-	    dplyr::mutate(pos1f = as.numeric(stringr::str_split_fixed(marker, "_", 2)[,2])) %>%
-	    dplyr::select(-marker) %>%
-	    # pos2f
-	    dplyr::left_join(mappos, by = c("pos2f" = "cM")) %>%
-	    dplyr::mutate(pos2f = as.numeric(stringr::str_split_fixed(marker, "_", 2)[,2])) %>%
-	    dplyr::select(-marker) %>%
-	    # pos1a
-	    dplyr::left_join(mappos, by = c("pos1a" = "cM")) %>%
-	    dplyr::mutate(pos1a = as.numeric(stringr::str_split_fixed(marker, "_", 2)[,2])) %>%
-	    dplyr::select(-marker) %>%
-	    # pos2a
-	    dplyr::left_join(mappos, by = c("pos2a" = "cM")) %>%
-	    dplyr::mutate(pos2a = as.numeric(stringr::str_split_fixed(marker, "_", 2)[,2])) %>%
-	    dplyr::select(-marker)
+	# how to get marker positions for both N2xCB cross objects
+	if("${params.cross}" == "N2xCB4856cross_full") {
+	    # riail marker conversion
+	    mappos <- qtl::pull.map(crossobj, as.table = TRUE) %>%
+	        dplyr::mutate(marker = rownames(.),
+	                      cM = as.character(pos)) %>%
+	        dplyr::select(-pos, -chr) %>%
+	        dplyr::distinct(cM, .keep_all = T) 
+	    
+	    # convert genetic pos to genomic pos
+	    test <- scan2_summary %>%
+	        # pos1f
+	        dplyr::left_join(mappos, by = c("pos1f" = "cM")) %>%
+	        dplyr::mutate(pos1f = as.numeric(stringr::str_split_fixed(marker, "_", 2)[,2])) %>%
+	        dplyr::select(-marker) %>%
+	        # pos2f
+	        dplyr::left_join(mappos, by = c("pos2f" = "cM")) %>%
+	        dplyr::mutate(pos2f = as.numeric(stringr::str_split_fixed(marker, "_", 2)[,2])) %>%
+	        dplyr::select(-marker) %>%
+	        # pos1a
+	        dplyr::left_join(mappos, by = c("pos1a" = "cM")) %>%
+	        dplyr::mutate(pos1a = as.numeric(stringr::str_split_fixed(marker, "_", 2)[,2])) %>%
+	        dplyr::select(-marker) %>%
+	        # pos2a
+	        dplyr::left_join(mappos, by = c("pos2a" = "cM")) %>%
+	        dplyr::mutate(pos2a = as.numeric(stringr::str_split_fixed(marker, "_", 2)[,2])) %>%
+	        dplyr::select(-marker)
+	} else if("${params.cross}" == "N2xCB4856cross") {
+	    data("N2xCB4856markers")
+	    
+	    # riail marker conversion
+	    mappos <- qtl::pull.map(crossobj, as.table = TRUE) %>%
+	        dplyr::mutate(marker = rownames(.),
+	                      cM = as.character(pos)) %>%
+	        dplyr::select(-pos, -chr) %>%
+	        dplyr::distinct(cM, .keep_all = T) %>%
+	        dplyr::left_join(N2xCB4856markers) %>%
+	        dplyr::mutate(marker = paste0(chr.roman, "_", position)) %>%
+	        dplyr::select(marker, cM)
+	    
+	    # convert genetic pos to genomic pos
+	    test <- scan2_summary %>%
+	        # pos1f
+	        dplyr::left_join(mappos, by = c("pos1f" = "cM")) %>%
+	        dplyr::mutate(pos1f = as.numeric(stringr::str_split_fixed(marker, "_", 2)[,2])) %>%
+	        dplyr::select(-marker) %>%
+	        # pos2f
+	        dplyr::left_join(mappos, by = c("pos2f" = "cM")) %>%
+	        dplyr::mutate(pos2f = as.numeric(stringr::str_split_fixed(marker, "_", 2)[,2])) %>%
+	        dplyr::select(-marker) %>%
+	        # pos1a
+	        dplyr::left_join(mappos, by = c("pos1a" = "cM")) %>%
+	        dplyr::mutate(pos1a = as.numeric(stringr::str_split_fixed(marker, "_", 2)[,2])) %>%
+	        dplyr::select(-marker) %>%
+	        # pos2a
+	        dplyr::left_join(mappos, by = c("pos2a" = "cM")) %>%
+	        dplyr::mutate(pos2a = as.numeric(stringr::str_split_fixed(marker, "_", 2)[,2])) %>%
+	        dplyr::select(-marker)
+	} else {
+	    # return scan2summary in cM instead of bp
+	    test <- scan2_summary
+	}
 
 	readr::write_tsv(test, "scan2summary.tsv")
 
