@@ -10,7 +10,7 @@ devtools::install_github("AndersenLab/linkagemapping")
 ```
 
 ### Input
-For the Andersen Lab, the input file is generally going to be the output from the `easysorter` pipeline. For now, only one trait is accepted. In general, you need a tsv dataframe of the following format (trait NEEDs to be `condition.trait`:
+For the Andersen Lab, the input file is generally going to be the output from the `easysorter` pipeline. For now, only one trait is accepted. In general, you need a tsv dataframe of the following format (trait NEEDs to be `condition.trait`):
 
 | trait | strain | phenotype |
 | --- | --- | --- |
